@@ -1,129 +1,194 @@
-# DealRadar - Plataforma de Comparacao de Precos
+# DealRadar 🛒
 
-**DealRadar** e uma aplicacao web desenvolvida em ASP.NET Core/Blazor para o trabalho pratico de Engenharia de Software II 2024/2025, no ambito do **Tema E - Plataforma de Comparacao de Precos**.
+**DealRadar** é uma plataforma web de **comparação de preços** desenvolvida em **ASP.NET Core Blazor**, no âmbito da unidade curricular de **Engenharia de Software II**.
 
-O projecto implementa uma plataforma para registo, consulta e comparacao de precos de produtos em diferentes lojas/supermercados. A aplicacao permite consultar produtos e precos, gerir entidades principais como produtos, lojas e categorias, confirmar ou actualizar precos e gerar relatorios associados a lojas e produtos.
+A aplicação permite consultar produtos, comparar preços entre lojas, acompanhar histórico de preços, confirmar valores registados por outros utilizadores e gerar relatórios associados a lojas e produtos.
 
-## Funcionalidades principais
+<p align="left">
+  <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET 8" />
+  <img src="https://img.shields.io/badge/Blazor-Server-512BD4?style=for-the-badge&logo=blazor&logoColor=white" alt="Blazor Server" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Database-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Identity-Auth-2C3E50?style=for-the-badge" alt="ASP.NET Core Identity" />
+</p>
 
-- Consulta publica de produtos e precos, sem obrigar a autenticacao.
-- Registo e autenticacao de utilizadores com ASP.NET Core Identity.
-- Tres niveis de permissao configurados no arranque: `Admin`, `UserManager` e `User`.
-- Criacao automatica de um utilizador administrador inicial quando a aplicacao arranca sem esse utilizador.
-- Pesquisa de produtos por nome, categoria ou loja.
-- Filtros e ordenacao de resultados por preco, nome e data.
-- Visualizacao de detalhe de produto com imagens, categoria, melhor preco e lojas associadas.
-- Historico de precos por produto, com visualizacao grafica.
-- Confirmacao de precos por utilizadores autenticados.
-- Edicao de precos existentes por utilizadores autenticados.
-- Calculo de credibilidade do preco atraves de estrategias baseadas em confirmacoes e antiguidade do registo.
-- Gestao de produtos, lojas e categorias a partir dos paineis de administracao/gestao.
-- Associacao de produtos a lojas e registo de precos por loja.
-- Listagem e gestao de utilizadores, incluindo estado activo/inactivo e role.
-- Consulta de actividade de utilizadores.
-- Envio de mensagens para utilizadores registados.
-- Relatorio geral de lojas com localizacao e numero de produtos por categoria.
-- Relatorio especifico de loja com produtos e precos mais recentes.
-- Relatorio especifico de produto com lojas e precos mais recentes.
-- Exportacao de relatorios em PDF.
-- API REST para entidades como produtos, lojas, categorias, precos, imagens, mensagens, relatorios e utilizadores.
-- Swagger disponivel em ambiente de desenvolvimento.
+---
 
-## Tecnologias usadas
+## Funcionalidades
 
-- **.NET 8 / ASP.NET Core**: base da aplicacao web.
-- **Blazor Server / Razor Components**: interface web interactiva.
-- **C#**: linguagem principal da aplicacao.
-- **ASP.NET Core Identity**: autenticacao, utilizadores e roles.
-- **Entity Framework Core**: acesso e persistencia de dados.
-- **PostgreSQL**: base de dados relacional.
-- **Npgsql.EntityFrameworkCore.PostgreSQL**: provider PostgreSQL para EF Core.
-- **Swagger / Swashbuckle**: documentacao e teste da API em desenvolvimento.
-- **QuestPDF**: geracao de relatorios PDF.
-- **ScottPlot / Chart.js via JavaScript**: suporte a visualizacoes/graficos de precos.
-- **Bootstrap**: estilos e componentes visuais.
-- **Leaflet / LeafletBlazor**: suporte a mapas/localizacao de lojas.
+### Consulta e comparação
+
+* pesquisa pública de produtos e preços;
+* filtros por nome, categoria e loja;
+* ordenação por preço, nome e data;
+* visualização do melhor preço por produto;
+* histórico de preços com representação gráfica;
+* consulta de produtos associados a cada loja.
+
+### Utilizadores e permissões
+
+* autenticação com **ASP.NET Core Identity**;
+* roles configuradas no arranque: `Admin`, `UserManager` e `User`;
+* criação automática de administrador inicial em ambiente local;
+* gestão de utilizadores, estado activo/inactivo e permissões;
+* consulta de actividade de utilizadores;
+* envio de mensagens para utilizadores registados.
+
+### Gestão da plataforma
+
+* gestão de produtos, lojas e categorias;
+* associação de produtos a lojas;
+* registo, confirmação e actualização de preços;
+* cálculo de credibilidade dos preços com base em confirmações e antiguidade;
+* painéis administrativos para entidades principais.
+
+### Relatórios
+
+* relatório geral de lojas;
+* relatório por loja, com produtos e preços mais recentes;
+* relatório por produto, com comparação entre lojas;
+* exportação de relatórios em PDF.
+
+---
 
 ## Arquitectura
 
-O projecto segue uma estrutura monolitica ASP.NET Core com separacao por responsabilidades:
+O projecto segue uma arquitectura monolítica em **ASP.NET Core**, com separação por responsabilidades entre interface, controladores, serviços, modelos, DTOs e persistência.
 
-- **Components**: paginas Blazor, layout, rotas e componentes de conta/autenticacao.
-- **Controllers**: endpoints REST para acesso a entidades principais.
-- **Services**: regras de aplicacao e operacoes sobre produtos, lojas, categorias, precos, utilizadores, relatorios e mensagens.
-- **Services/Strategies**: estrategias para calculo de credibilidade de precos.
-- **Models**: entidades de dominio persistidas na base de dados.
-- **DTOs**: objectos de transferencia usados em listagens, pesquisas e respostas.
-- **Data**: `ApplicationDbContext` e configuracao das relacoes Entity Framework.
-- **Migrations**: migracoes EF Core para criacao/evolucao da base de dados.
-- **wwwroot**: ficheiros estaticos, CSS, JavaScript, imagens e Bootstrap.
+```mermaid
+flowchart LR
+    U[Utilizador] --> B[Blazor Server / Razor Components]
+    B --> C[Controllers REST]
+    B --> S[Services]
+    C --> S
+    S --> ST[Strategies<br/>Price Credibility]
+    S --> EF[Entity Framework Core]
+    EF --> DB[(PostgreSQL)]
+    S --> PDF[QuestPDF]
+    B --> UI[Bootstrap / JS / Charts / Leaflet]
+```
 
-### Entidades principais
+### Organização principal
 
-- `Product`: produto pesquisavel e comparavel.
-- `Store`: loja/supermercado com localizacao e URL Google Maps.
-- `Price`: preco de um produto numa loja, com data e grau de confianca.
-- `PriceConfirmation`: confirmacao de preco feita por um utilizador.
-- `Category`: categoria de produto.
-- `User`: utilizador Identity com estado activo/inactivo.
-- `Message`: mensagem enviada para utilizadores.
-- `Report` / `GeneratedReport`: suporte a relatorios.
+| Camada                | Responsabilidade                                       |
+| --------------------- | ------------------------------------------------------ |
+| `Components`          | páginas Blazor, layout, rotas e conta/autenticação     |
+| `Controllers`         | endpoints REST para entidades principais               |
+| `Services`            | regras de aplicação e operações de negócio             |
+| `Services/Strategies` | estratégias de cálculo de credibilidade de preços      |
+| `Models`              | entidades de domínio                                   |
+| `DTOs`                | objectos de transferência de dados                     |
+| `Data`                | `ApplicationDbContext` e configuração Entity Framework |
+| `Migrations`          | evolução da base de dados                              |
+| `wwwroot`             | CSS, JavaScript, imagens e assets estáticos            |
 
-## Estrutura de pastas
+---
+
+## Entidades principais
+
+| Entidade                     | Descrição                                              |
+| ---------------------------- | ------------------------------------------------------ |
+| `Product`                    | produto pesquisável e comparável                       |
+| `Store`                      | loja/supermercado com localização e URL do Google Maps |
+| `Price`                      | preço de um produto numa loja                          |
+| `PriceConfirmation`          | confirmação de preço feita por utilizadores            |
+| `Category`                   | categoria de produto                                   |
+| `User`                       | utilizador Identity com estado e role                  |
+| `Message`                    | mensagens enviadas para utilizadores                   |
+| `Report` / `GeneratedReport` | suporte à geração e consulta de relatórios             |
+
+---
+
+## Tecnologias
+
+* **.NET 8 / ASP.NET Core** — base da aplicação;
+* **Blazor Server / Razor Components** — interface web interactiva;
+* **C#** — linguagem principal;
+* **ASP.NET Core Identity** — autenticação, utilizadores e roles;
+* **Entity Framework Core** — acesso e persistência de dados;
+* **PostgreSQL** — base de dados relacional;
+* **Swagger / Swashbuckle** — documentação e teste da API;
+* **QuestPDF** — geração de relatórios PDF;
+* **ScottPlot / Chart.js** — visualização de histórico de preços;
+* **Bootstrap** — estilos e componentes visuais;
+* **Leaflet / LeafletBlazor** — mapas e localização de lojas.
+
+---
+
+## Estrutura do projecto
 
 ```text
 .
-|-- Components/          # Paginas Blazor, layouts, rotas e area de conta
-|-- Controllers/         # Controladores REST da API
-|-- Data/                # ApplicationDbContext
-|-- DTOs/                # Data Transfer Objects
-|-- Migrations/          # Migracoes Entity Framework Core
-|-- Models/              # Modelos de dominio
-|-- Properties/          # Perfis de arranque
-|-- Services/            # Servicos de aplicacao e estrategias
-|-- wwwroot/             # Assets estaticos, CSS, JS, imagens e Bootstrap
-|-- appsettings.json     # Configuracao da aplicacao
-|-- ESIID42025.csproj    # Projecto ASP.NET Core
-|-- esiid42025.sln       # Solucao Visual Studio/.NET
-|-- global.json          # SDK .NET preferencial
-|-- Program.cs           # Configuracao da app, DI, Identity, Swagger e pipeline HTTP
+├── Components/          # Páginas Blazor, layouts, rotas e autenticação
+├── Controllers/         # Controladores REST da API
+├── Data/                # ApplicationDbContext
+├── DTOs/                # Data Transfer Objects
+├── Migrations/          # Migrações Entity Framework Core
+├── Models/              # Modelos de domínio
+├── Properties/          # Perfis de arranque
+├── Services/            # Serviços de aplicação e estratégias
+├── wwwroot/             # Assets estáticos, CSS, JS, imagens e Bootstrap
+├── appsettings.json     # Configuração da aplicação
+├── ESIID42025.csproj    # Projecto ASP.NET Core
+├── esiid42025.sln       # Solução .NET
+├── global.json          # SDK .NET preferencial
+└── Program.cs           # Configuração, DI, Identity, Swagger e pipeline HTTP
 ```
 
-## Como executar
+---
 
-### Pre-requisitos
+## Pré-requisitos
 
-- .NET SDK 8.x
-- PostgreSQL
-- Ferramenta `dotnet-ef`, se for necessario aplicar migracoes pela linha de comandos:
+* [.NET SDK 8.x](https://dotnet.microsoft.com/download/dotnet/8.0);
+* PostgreSQL;
+* ferramenta `dotnet-ef`, caso seja necessário aplicar migrações pela linha de comandos.
+
+Instalar `dotnet-ef`:
 
 ```bash
 dotnet tool install --global dotnet-ef
 ```
 
-### Configurar a base de dados
+---
 
-O ficheiro `appsettings.json` contem a connection string `DefaultConnection` para PostgreSQL:
+## Configuração
+
+A aplicação usa PostgreSQL através da connection string `DefaultConnection`.
+
+Para ambiente local, configura a ligação em `appsettings.Development.json` ou através de variáveis de ambiente:
 
 ```json
-"DefaultConnection": "Host=localhost;Database=ES2-d4;Username=postgres;Password=d3rp1234"
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Database=DealRadar;Username=<user>;Password=<password>"
+  }
+}
 ```
 
-Antes de executar, confirma que o PostgreSQL esta activo e que a connection string corresponde ao teu ambiente local.
+Também podes definir a connection string por variável de ambiente:
 
-### Restaurar dependencias
+```bash
+ConnectionStrings__DefaultConnection="Host=localhost;Database=DealRadar;Username=<user>;Password=<password>"
+```
+
+> Credenciais reais não devem ser guardadas no repositório.
+
+---
+
+## Execução
+
+### 1. Restaurar dependências
 
 ```bash
 dotnet restore
 ```
 
-### Aplicar migracoes
+### 2. Aplicar migrações
 
 ```bash
 dotnet ef database update
 ```
 
-### Executar a aplicacao
+### 3. Executar a aplicação
 
 ```bash
 dotnet run --project ESIID42025.csproj
@@ -131,57 +196,52 @@ dotnet run --project ESIID42025.csproj
 
 Perfis de arranque configurados:
 
-- HTTP: `http://localhost:5147`
-- HTTPS: `https://localhost:7083`
+```text
+HTTP:  http://localhost:5147
+HTTPS: https://localhost:7083
+```
 
-Em ambiente de desenvolvimento, o Swagger devera ficar disponivel em:
+Em ambiente de desenvolvimento, o Swagger fica disponível em:
 
 ```text
 /swagger
 ```
 
-### Utilizador administrador inicial
+---
 
-O `Program.cs` cria automaticamente as roles `Admin`, `UserManager` e `User`. Tambem cria um administrador inicial se este ainda nao existir:
+## Utilizador administrador inicial
+
+No arranque, o `Program.cs` cria as roles:
+
+```text
+Admin
+UserManager
+User
+```
+
+Também é criado um administrador inicial, caso ainda não exista:
 
 ```text
 Email: admin@example.com
 Password: Admin@123
 ```
 
-Estas credenciais devem ser alteradas ou removidas antes de qualquer utilizacao fora de ambiente academico/local.
+> Estas credenciais destinam-se apenas a ambiente académico/local e devem ser alteradas antes de qualquer utilização real.
 
-## Variaveis de ambiente
-
-Nao foram identificadas variaveis de ambiente obrigatorias no codigo. A configuracao principal esta em `appsettings.json`.
-
-Em alternativa ao ficheiro de configuracao, a connection string pode ser fornecida atraves do mecanismo normal de configuracao do ASP.NET Core, por exemplo:
-
-```bash
-ConnectionStrings__DefaultConnection="Host=localhost;Database=ES2-d4;Username=postgres;Password=..."
-```
-
-Variaveis/perfis relevantes:
-
-- `ASPNETCORE_ENVIRONMENT`: definido como `Development` nos perfis de `launchSettings.json`.
-- `ConnectionStrings__DefaultConnection`: alternativa recomendada para configurar a base de dados sem guardar credenciais no repositorio.
-
-## Screenshots
-
-Nao foi encontrada uma pasta `docs/screenshots` neste repositorio. Por isso, este README nao inclui capturas de ecra.
+---
 
 ## Estado do projecto
 
-Projecto academico desenvolvido para Engenharia de Software II. A implementacao presente no repositorio cobre a base funcional de uma plataforma de comparacao de precos: autenticacao, roles, produtos, lojas, categorias, precos, confirmacoes, relatorios e paineis de administracao.
+Projecto académico desenvolvido para **Engenharia de Software II**, no tema **Plataforma de Comparação de Preços**.
 
-De forma prudente, este README descreve apenas funcionalidades observadas no codigo. Nao foi identificada uma pasta de testes unitarios no repositorio, apesar de o enunciado geral referir testes como elemento esperado da entrega.
+A versão actual inclui autenticação, gestão de produtos, lojas, categorias, preços, confirmações, relatórios, exportação PDF, áreas administrativas e API REST.
+
+---
 
 ## Autores
 
-Autores/contribuidores identificados no historico Git do repositorio:
-
-- [Simao Sousa](https://github.com/simaosousa10)
-- Luis Felipe Flores
-- [Pedro Cruz](https://github.com/pedrojcruz)
-- Deerpyyy
-- [Daniel Alves](https://github.com/DanielA1ves)
+* [Simão Sousa](https://github.com/simaosousa10)
+* [Luis Felipe Flores](https://github.com/LouisOfTheFlowers)
+* [Pedro Cruz](https://github.com/pedrojcruz)
+* [Deerpyyy](https://github.com/Deerpyyy)
+* [Daniel Alves](https://github.com/DanielA1ves)
